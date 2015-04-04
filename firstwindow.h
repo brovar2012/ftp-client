@@ -9,6 +9,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QCheckBox>
+#include <QFileSystemModel>
+#include <QTreeView>
 
 
 class firstWindow:public QDialog
@@ -21,6 +23,10 @@ private:
     QLabel *serverAdress,*port,*password;
     QLineEdit *serverAdressLine,*portLine,*passwordLine;
     QPushButton *ok,*exit;
-
+    QFileSystemModel *model;
+    QTreeView *table;
+public slots:
+    void openPaPka();
 };
 #endif
+
