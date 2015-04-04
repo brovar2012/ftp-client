@@ -11,6 +11,7 @@
 #include <QCheckBox>
 #include <QFileSystemModel>
 #include <QTreeView>
+#include <QMenuBar>
 
 
 class firstWindow:public QDialog
@@ -29,4 +30,3 @@ public slots:
     void openPaPka();
 };
 #endif
-
