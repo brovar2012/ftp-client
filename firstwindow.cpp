@@ -1,4 +1,3 @@
-@@ -1,42 +0,0 @@
 #include "firstwindow.h"
 
 firstWindow::firstWindow(QWidget *parent): QDialog(parent)
@@ -11,6 +10,11 @@ firstWindow::firstWindow(QWidget *parent): QDialog(parent)
     serverAdressLine = new QLineEdit;
     portLine = new QLineEdit;
     passwordLine = new QLineEdit;
+    model = new QFileSystemModel;
+    table = new QTreeView;
+    table->setModel(model);
+    table->setRootIndex(model->index("D://JAVARUSH/"));
+
 
     QVBoxLayout *server = new QVBoxLayout;
     server->addWidget(serverAdress);
@@ -31,6 +35,7 @@ firstWindow::firstWindow(QWidget *parent): QDialog(parent)
     QHBoxLayout *high = new QHBoxLayout;
     high->addLayout(server);
     high->addLayout(portLayout);
+    high->addWidget(table);
 
     QVBoxLayout *all = new QVBoxLayout;
     all->addLayout(high);
@@ -38,6 +43,13 @@ firstWindow::firstWindow(QWidget *parent): QDialog(parent)
     all->addLayout(button);
 
     connect(exit, SIGNAL(clicked()), this, SLOT(close()));
+    connect (ok,SIGNAL(clicked()), this, SLOT(openPaPka()));
     setLayout(all);
     setWindowTitle("Подключение к серверу");
+}
+
+void firstWindow::openPaPka()
+{
+        QString dir("D://JAVARUSH/");
+        model->setRootPath(dir);
 }
