@@ -25,7 +25,7 @@ mainWindow::mainWindow(QWidget *parent): QDialog(parent),ftp(0)
     menu = new QMenuBar;
 
     fileMenu = new QMenu("Файл");
-    fileMenu->addAction("Справка",this, SLOT(callConnectionWindow()));
+    fileMenu->addAction("Подключить",this, SLOT(callConnectionWindow()));
     fileMenu->addAction("Выход",this,SLOT(close()));
 
     menu->addMenu(fileMenu);
@@ -125,7 +125,17 @@ void mainWindow::adressOfCompIsChange()
 
 void mainWindow::callConnectionWindow()
 {
-
+    connectionWindow = new firstWindow;
+    connectionWindow->show();
+    if (connectionWindow->closeWindow() == true )
+    {
+        ftpServerLineEdit->setText(connectionWindow->getAdress());
+        login = connectionWindow->getAdress();
+        password = connectionWindow->getAdress();
+        anonymusOrNo = connectionWindow->getAnonymus();
+        return;
+    }
+    return;
 }
 
 QSize mainWindow::sizeHint()
@@ -164,14 +174,14 @@ void mainWindow::connectOrDisconnect()
     QUrl url(ftpServerLineEdit->text());
     if (!url.isValid() || url.scheme().toLower() != QLatin1String("ftp")) {
         ftp->connectToHost(ftpServerLineEdit->text(), 21);
-        ftp->login();
+        ftp->login("test0","123");
     } else {
         ftp->connectToHost(url.host(), url.port(21));
 
         if (!url.userName().isEmpty())
             ftp->login(QUrl::fromPercentEncoding(url.userName().toLatin1()), url.password());
         else
-            ftp->login();
+           ftp->login("test0","123");
         if (!url.path().isEmpty())
             ftp->cd(url.path());
     }
@@ -218,23 +228,33 @@ void mainWindow::downloadFile()
 
 void mainWindow::loadFile()
 {
-    QString fileName = fileList->currentItem()->text(0);
-    //QString fullFileName;
-    //if (adressOfComp.isEmpty())
-      //  fullFileName = fileName;
-    //else
-     //   fullFileName = adressOfComp+"/"+fileName;
-    file = new QFile(adressOfComp);
-    file->open(QIODevice::ReadOnly);
-    qDebug()<<adressOfComp;
+    /*file = new QFile(adressOfComp);
+    if (!file->open(QIODevice::WriteOnly)) {
+        QMessageBox::information(this, tr("FTP"),
+                                 tr("Невозможно сохранить файл %1: %2.")
+                                 .arg(adressOfComp).arg(file->errorString()));
+        delete file;
+        return;
+    }
 
     ftp->put(file,file->fileName());
-
     progressDialog->setLabelText(tr("Загрузка %1...").arg(file->fileName()));
     downloadButton->setEnabled(false);
     progressDialog->exec();
 
+    qDebug()<<adressOfComp;*/
+    QUrl url2("ftp://127.0.0.1/somefile");
+    QFile *data;
+     QNetworkReply *reply;
+    QNetworkAccessManager *nam;
+        url2.setUserName("ftpusername");
+        url2.setPassword("ftppassword");
 
+        data = new QFile(adressOfComp, this);
+        if (data->open(QIODevice::ReadOnly)) {
+            nam = new QNetworkAccessManager;
+            reply = nam->put(QNetworkRequest(url2), data);
+}
 }
 
 void mainWindow::removeFile()
