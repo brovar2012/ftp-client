@@ -51,8 +51,11 @@ private:
     QProgressDialog *progressDialog;
     QHash<QString, bool> isDirectory;
     QString currentPath;
+    QString login,password;
+    bool anonymusOrNo;
     QFtp *ftp;
     QFile *file;
+    firstWindow *connectionWindow;
 public slots:
     // для компа
     void callConnectionWindow();
