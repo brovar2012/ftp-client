@@ -3,28 +3,31 @@
 firstWindow::firstWindow(QWidget *parent): QDialog(parent)
 {
     serverAdress = new QLabel("Адрес сервера:");
-    port = new QLabel ("Порт:");
-    password = new QLabel ("Пароль администратора:");
-    ok = new QPushButton("Подкючить");
-    exit = new QPushButton("Выход");
     serverAdressLine = new QLineEdit;
-    portLine = new QLineEdit;
-    passwordLine = new QLineEdit;
-    model = new QFileSystemModel;
-    table = new QTreeView;
-    table->setModel(model);
-    table->setRootIndex(model->index("D://JAVARUSH/"));
 
+    password = new QLabel ("Пароль:");
+    passwordLine = new QLineEdit;
+
+    login = new QLabel("Логин:");
+    loginLine = new QLineEdit;
+
+    ok = new QPushButton("Подключить");
+    exit = new QPushButton("Отмена подключения");
+
+    box = new QCheckBox();
+    anonymus = new QLabel("Анонимный вход");
+
+    box->setChecked(true);
+    passwordLine->setEnabled(false);
+    loginLine->setEnabled(false);
 
     QVBoxLayout *server = new QVBoxLayout;
     server->addWidget(serverAdress);
     server->addWidget(serverAdressLine);
 
-    QVBoxLayout *portLayout = new QVBoxLayout;
-    portLayout->addWidget(port);
-    portLayout->addWidget(portLine);
-
     QVBoxLayout *passwordLayout = new QVBoxLayout;
+    passwordLayout->addWidget(login);
+    passwordLayout->addWidget(loginLine);
     passwordLayout->addWidget(password);
     passwordLayout->addWidget(passwordLine);
 
@@ -32,24 +35,75 @@ firstWindow::firstWindow(QWidget *parent): QDialog(parent)
     button->addWidget(ok);
     button->addWidget(exit);
 
-    QHBoxLayout *high = new QHBoxLayout;
-    high->addLayout(server);
-    high->addLayout(portLayout);
-    high->addWidget(table);
+    QHBoxLayout *login1 = new QHBoxLayout;
+    login1->addWidget(box);
+    login1->addWidget(anonymus);
 
     QVBoxLayout *all = new QVBoxLayout;
-    all->addLayout(high);
+    all->addLayout(server);
     all->addLayout(passwordLayout);
+    all->addLayout(login1);
     all->addLayout(button);
 
     connect(exit, SIGNAL(clicked()), this, SLOT(close()));
-    connect (ok,SIGNAL(clicked()), this, SLOT(openPaPka()));
+    connect (ok,SIGNAL(clicked()), this, SLOT(connectToServer()));
+    connect (box,SIGNAL(clicked()),this,SLOT (anonymusHasChanged()));
     setLayout(all);
     setWindowTitle("Подключение к серверу");
 }
 
-void firstWindow::openPaPka()
+void firstWindow::connectToServer()
 {
-        QString dir("D://JAVARUSH/");
-        model->setRootPath(dir);
+    if (serverAdressLine->text().isEmpty())
+    {
+        QMessageBox::information(this, tr("Ошибка"),
+                                 tr("Строка адреса пуста."));
+        return;
+    }
+    else
+        closeOrNot = true;
+        close();
 }
+
+void firstWindow :: anonymusHasChanged()
+{
+   if (box->isChecked())
+   {
+       passwordLine->setEnabled(false);
+       loginLine->setEnabled(false);
+   }
+    else
+   {
+       passwordLine->setEnabled(true);
+       loginLine->setEnabled(true);
+   }
+}
+
+QString firstWindow::getAdress()
+{
+    return serverAdressLine->text();
+}
+
+QString firstWindow::getLogin()
+{
+    return serverAdressLine->text();
+}
+
+QString firstWindow::getPassword()
+{
+    return serverAdressLine->text();
+}
+
+bool firstWindow::getAnonymus()
+{
+    if (box->isChecked())
+        return true;
+    else
+        return false;
+}
+
+bool firstWindow::closeWindow()
+{
+    return closeOrNot;
+}
+
