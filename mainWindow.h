@@ -19,6 +19,7 @@
 
 #include "qftp.h"
 #include "qurlinfo.h"
+#include "firstwindow.h"
 
 class mainWindow:public QDialog
 {
@@ -26,23 +27,26 @@ class mainWindow:public QDialog
 public:
     mainWindow(QWidget *parent=0);
     QSize sizeHint();
-public:
+private:
     // - для главного окна
     QMenuBar *menu;
     QMenu *fileMenu;
-    QMenu *help;
     QLineEdit *ftpAdress,*computerAdress;
     QFileSystemModel *modelOfComp;
     QTreeView *tableOfComp;
+    QLabel *choiseOfCurrentPath;
+    QPushButton *buttonLoad;
+    QDialogButtonBox *buttonBox1;
+    QString adressOfComp;
     // - для окна FTP
-    QLabel *ftpServerLabel;
+    QLabel *ftpServerLabel,*currentPathLabel;
     QLineEdit *ftpServerLineEdit;
     QLabel *statusLabel;
     QTreeWidget *fileList;
     QPushButton *cdToParentButton;
     QPushButton *connectButton;
     QPushButton *downloadButton;
-    QPushButton *quitButton;
+    QPushButton *deleteButton;
     QDialogButtonBox *buttonBox;
     QProgressDialog *progressDialog;
     QHash<QString, bool> isDirectory;
@@ -51,7 +55,7 @@ public:
     QFile *file;
 public slots:
     // для компа
-    void see();
+    void callConnectionWindow();
     // для FTP
     void connectOrDisconnect();
     void downloadFile();
@@ -64,6 +68,9 @@ public slots:
     void updateDataTransferProgress(qint64 readBytes,
                                     qint64 totalBytes);
     void enableDownloadButton();
+    void adressOfCompIsChange();
+    void removeFile ();
+    void loadFile();
 };
 
 #endif // MAINWINDOW_H
