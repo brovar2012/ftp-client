@@ -4,42 +4,39 @@ mainWindow::mainWindow(QWidget *parent): QDialog(parent),ftp(0)
 {
     // для главного окна
     modelOfComp = new QFileSystemModel;
-    modelOfComp = new QFileSystemModel;
-
-    QString adressOfComp = "C:/Qt/Qt5.3.2/Tools/QtCreator/bin/build-untitled1-Desktop_Qt_5_3_MSVC2010_OpenGL_32bit-Debug";
-    modelOfComp->setRootPath(adressOfComp);
-
+    modelOfComp->setRootPath(currentPath);
+    QString adressOfComp;
     tableOfComp = new QTreeView;
     tableOfComp->setModel(modelOfComp);
     tableOfComp->setRootIndex(modelOfComp->index(adressOfComp));
 
+
+    currentPathLabel = new QLabel(tr("Текущая папка:"));
+    choiseOfCurrentPath = new QLabel("Выберите папку для сохранения файлов или загрузки.");
+    buttonLoad = new QPushButton("Загрузить файл");
+    buttonLoad->setEnabled(false);
+    buttonLoad->setEnabled(false);
+    buttonLoad->setMaximumSize(400,23);
     ftpAdress = new QLineEdit;
     computerAdress = new QLineEdit;
     computerAdress->setText(adressOfComp);
+    computerAdress->setEnabled(false);
 
     menu = new QMenuBar;
-    //menu->addMenu("Файл");
-    //menu->addMenu("Справка");
 
     fileMenu = new QMenu("Файл");
-    fileMenu->addAction("Подключить",this, SLOT(see()));
-    fileMenu->addAction("2");
-
-    help = new QMenu("Справка");
-    help->addAction("1");
-    help->addAction("2");
-    help->addSeparator();
+    fileMenu->addAction("Справка",this, SLOT(callConnectionWindow()));
+    fileMenu->addAction("Выход",this,SLOT(close()));
 
     menu->addMenu(fileMenu);
-    menu->addMenu(help);
 
     //------------------------------------------
 
-    ftpServerLabel = new QLabel(tr("Ftp &server:"));
+    ftpServerLabel = new QLabel(tr("Ftp &сервер:"));
     ftpServerLineEdit = new QLineEdit("127.0.0.1");
     ftpServerLabel->setBuddy(ftpServerLineEdit);
 
-    statusLabel = new QLabel(tr("Please enter the name of an FTP server."));
+    statusLabel = new QLabel(tr("Для подключения нажмите 'Подключить'."));
 
     fileList = new QTreeWidget;
     fileList->setEnabled(false);
@@ -47,21 +44,22 @@ mainWindow::mainWindow(QWidget *parent): QDialog(parent),ftp(0)
     fileList->setHeaderLabels(QStringList() << tr("Name") << tr("Size") << tr("Owner") << tr("Group") << tr("Time"));
     fileList->header()->setStretchLastSection(false);
 
-    connectButton = new QPushButton(tr("Connect"));
+    connectButton = new QPushButton(tr("Подключить"));
     connectButton->setDefault(true);
 
     cdToParentButton = new QPushButton;
     cdToParentButton->setIcon(QPixmap("cdtoparent.png"));
     cdToParentButton->setEnabled(false);
 
-    downloadButton = new QPushButton(tr("Download"));
+    downloadButton = new QPushButton(tr("Скачать"));
     downloadButton->setEnabled(false);
 
-    quitButton = new QPushButton(tr("Quit"));
+    deleteButton = new QPushButton(tr("Удалить"));
+    deleteButton->setEnabled(false);
 
-    buttonBox = new QDialogButtonBox;
-    buttonBox->addButton(downloadButton, QDialogButtonBox::ActionRole);
-    buttonBox->addButton(quitButton, QDialogButtonBox::RejectRole);
+    QHBoxLayout *buttonLayout = new QHBoxLayout;
+    buttonLayout->addWidget(downloadButton);
+    buttonLayout->addWidget(deleteButton);
 
     progressDialog = new QProgressDialog(this);
 
@@ -75,7 +73,7 @@ mainWindow::mainWindow(QWidget *parent): QDialog(parent),ftp(0)
     mainLayout->addLayout(topLayout);
     mainLayout->addWidget(fileList);
     mainLayout->addWidget(statusLabel);
-    mainLayout->addWidget(buttonBox);
+    mainLayout->addLayout(buttonLayout);
     //_______________________________________________
     QHBoxLayout *high = new QHBoxLayout;
     high->addWidget(menu);
@@ -83,9 +81,14 @@ mainWindow::mainWindow(QWidget *parent): QDialog(parent),ftp(0)
     QVBoxLayout *ftpLayout = new QVBoxLayout;
     ftpLayout->addLayout(mainLayout);
 
+    QHBoxLayout *blabla = new QHBoxLayout;
+    blabla->addWidget(currentPathLabel);
+    blabla->addWidget(computerAdress);
     QVBoxLayout *compLayout = new QVBoxLayout;
-    compLayout->addWidget(computerAdress);
+    compLayout->addLayout(blabla);
     compLayout->addWidget(tableOfComp);
+    compLayout->addWidget(choiseOfCurrentPath);
+    compLayout->addWidget(buttonLoad);
 
     QHBoxLayout *midle = new QHBoxLayout;
     midle->addLayout(ftpLayout);
@@ -105,15 +108,24 @@ mainWindow::mainWindow(QWidget *parent): QDialog(parent),ftp(0)
     connect(connectButton, SIGNAL(clicked()), this, SLOT(connectOrDisconnect()));
     connect(cdToParentButton, SIGNAL(clicked()), this, SLOT(cdToParent()));
     connect(downloadButton, SIGNAL(clicked()), this, SLOT(downloadFile()));
-    connect(quitButton, SIGNAL(clicked()), this, SLOT(close()));
+    connect (tableOfComp,SIGNAL(clicked(QModelIndex)),this,SLOT(adressOfCompIsChange()));
+    connect (deleteButton,SIGNAL(clicked()),this,SLOT(removeFile()));
+    connect (buttonLoad,SIGNAL(clicked()),this,SLOT(loadFile()));
 
     setLayout(all);
     setWindowTitle(tr("Bondar's && Brovar's ftp =)"));
 }
 
-void mainWindow::see()
+void mainWindow::adressOfCompIsChange()
 {
-    qDebug("Тут будет типо подключение");
+    QModelIndexList lst = tableOfComp->selectionModel()->selectedIndexes();
+    adressOfComp = modelOfComp->filePath(lst.at(0));
+    computerAdress->setText(adressOfComp);
+}
+
+void mainWindow::callConnectionWindow()
+{
+
 }
 
 QSize mainWindow::sizeHint()
@@ -131,11 +143,10 @@ void mainWindow::connectOrDisconnect()
         cdToParentButton->setEnabled(false);
         downloadButton->setEnabled(false);
         connectButton->setEnabled(true);
-        connectButton->setText(tr("Connect"));
+        connectButton->setText(tr("Подключение"));
         setCursor(Qt::ArrowCursor);
         return;
     }
-
     setCursor(Qt::WaitCursor);
 
     ftp = new QFtp(this);
@@ -167,35 +178,93 @@ void mainWindow::connectOrDisconnect()
 
     fileList->setEnabled(true);
     connectButton->setEnabled(false);
-    connectButton->setText(tr("Disconnect"));
-    statusLabel->setText(tr("Connecting to FTP server %1...")
+    deleteButton->setEnabled(true);
+    buttonLoad->setEnabled(true);
+    connectButton->setText(tr("Отсоединение"));
+    statusLabel->setText(tr("Подключение к FTP серверу %1...")
                          .arg(ftpServerLineEdit->text()));
 }
 
 void mainWindow::downloadFile()
 {
     QString fileName = fileList->currentItem()->text(0);
+    QString fullFileName;
+    if (adressOfComp.isEmpty())
+        fullFileName = fileName;
+    else
+        fullFileName = adressOfComp+"/"+fileName;
 
-    if (QFile::exists(fileName)) {
+    if (QFile::exists(fullFileName)) {
         QMessageBox::information(this, tr("FTP"),
-                                 tr("There already exists a file called %1 in "
-                                    "the current directory.")
+                                 tr("В текущей дериктории уже существует файл с именем %1.")
                                  .arg(fileName));
         return;
     }
-
-    file = new QFile(fileName);
+    file = new QFile(fullFileName);
     if (!file->open(QIODevice::WriteOnly)) {
         QMessageBox::information(this, tr("FTP"),
-                                 tr("Unable to save the file %1: %2.")
-                                 .arg(fileName).arg(file->errorString()));
+                                 tr("Невозможно сохранить файл %1: %2.")
+                                 .arg(fullFileName).arg(file->errorString()));
         delete file;
         return;
     }
 
     ftp->get(fileList->currentItem()->text(0), file);
 
-    progressDialog->setLabelText(tr("Downloading %1...").arg(fileName));
+    progressDialog->setLabelText(tr("Скачивание %1...").arg(fileName));
+    downloadButton->setEnabled(false);
+    progressDialog->exec();
+}
+
+void mainWindow::loadFile()
+{
+    QString fileName = fileList->currentItem()->text(0);
+    //QString fullFileName;
+    //if (adressOfComp.isEmpty())
+      //  fullFileName = fileName;
+    //else
+     //   fullFileName = adressOfComp+"/"+fileName;
+    file = new QFile(adressOfComp);
+    file->open(QIODevice::ReadOnly);
+    qDebug()<<adressOfComp;
+
+    ftp->put(file,file->fileName());
+
+    progressDialog->setLabelText(tr("Загрузка %1...").arg(file->fileName()));
+    downloadButton->setEnabled(false);
+    progressDialog->exec();
+
+
+}
+
+void mainWindow::removeFile()
+{
+    /*QString fileName = fileList->currentItem()->text(0);
+    QString fullFileName;
+    if (adressOfComp.isEmpty())
+        fullFileName = fileName;
+    else
+        fullFileName = adressOfComp+"/"+fileName;
+
+    if (QFile::exists(fullFileName)) {
+        QMessageBox::information(this, tr("FTP"),
+                                 tr("В текущей дериктории уже существует файл с именем %1.")
+                                 .arg(fileName));
+        return;
+    }
+    file = new QFile(fullFileName);
+    if (!file->open(QIODevice::WriteOnly)) {
+        QMessageBox::information(this, tr("FTP"),
+                                 tr("Невозможно сохранить файл %1: %2.")
+                                 .arg(fullFileName).arg(file->errorString()));
+        delete file;
+        return;
+    }*/
+    ftp->login("ftp-user1","123");
+    ftp->remove(fileList->currentItem()->text(0));//, file);
+    qDebug()<<1;
+
+    progressDialog->setLabelText(tr("Удаление %1...").arg(fileList->currentItem()->text(0)));
     downloadButton->setEnabled(false);
     progressDialog->exec();
 }
@@ -212,15 +281,14 @@ void mainWindow::ftpCommandFinished(int, bool error)
     if (ftp->currentCommand() == QFtp::ConnectToHost) {
         if (error) {
             QMessageBox::information(this, tr("FTP"),
-                                     tr("Unable to connect to the FTP server "
-                                        "at %1. Please check that the host "
-                                        "name is correct.")
+                                     tr("Невозможно подключиться к"
+                                        " %1.Проверьте имя хоста.")
                                      .arg(ftpServerLineEdit->text()));
             connectOrDisconnect();
             return;
         }
 
-        statusLabel->setText(tr("Logged onto %1.")
+        statusLabel->setText(tr("Подключено к %1.")
                              .arg(ftpServerLineEdit->text()));
         fileList->setFocus();
         downloadButton->setDefault(true);
@@ -233,12 +301,12 @@ void mainWindow::ftpCommandFinished(int, bool error)
 
     if (ftp->currentCommand() == QFtp::Get) {
         if (error) {
-            statusLabel->setText(tr("Canceled download of %1.")
+            statusLabel->setText(tr("Прервана загрузка файла %1.")
                                  .arg(file->fileName()));
             file->close();
             file->remove();
         } else {
-            statusLabel->setText(tr("Downloaded %1 to current directory.")
+            statusLabel->setText(tr("Файл %1 загружен в указанную папку.")
                                  .arg(file->fileName()));
             file->close();
         }
@@ -247,7 +315,7 @@ void mainWindow::ftpCommandFinished(int, bool error)
         progressDialog->hide();
     } else if (ftp->currentCommand() == QFtp::List) {
         if (isDirectory.isEmpty()) {
-            fileList->addTopLevelItem(new QTreeWidgetItem(QStringList() << tr("<empty>")));
+            fileList->addTopLevelItem(new QTreeWidgetItem(QStringList() << tr("<пусто>")));
             fileList->setEnabled(false);
         }
     }
