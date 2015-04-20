@@ -4,6 +4,7 @@ firstWindow::firstWindow(QWidget *parent): QDialog(parent)
 {
     serverAdress = new QLabel("Адрес сервера:");
     serverAdressLine = new QLineEdit;
+    serverAdressLine->setText("127.0.0.1");
 
     password = new QLabel ("Пароль:");
     passwordLine = new QLineEdit;
@@ -86,12 +87,12 @@ QString firstWindow::getAdress()
 
 QString firstWindow::getLogin()
 {
-    return serverAdressLine->text();
+    return loginLine->text();
 }
 
 QString firstWindow::getPassword()
 {
-    return serverAdressLine->text();
+    return passwordLine->text();
 }
 
 bool firstWindow::getAnonymus()
