@@ -115,7 +115,7 @@ mainWindow::mainWindow(QWidget *parent): QDialog(parent),ftp(0)
     connect (buttonLoad,SIGNAL(clicked()),this,SLOT(loadFile()));
 
     setLayout(all);
-    setWindowTitle(tr("Bondar's && Brovar's ftp =)"));
+    setWindowTitle(tr("Brovar's ftp"));
 }
 
 void mainWindow::adressOfCompIsChange()
