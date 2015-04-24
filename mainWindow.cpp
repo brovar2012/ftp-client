@@ -43,7 +43,7 @@ mainWindow::mainWindow(QWidget *parent): QDialog(parent),ftp(0)
     fileList->setEnabled(false);
     fileList->setRootIsDecorated(false);
     fileList->setHeaderLabels(QStringList() << tr("Name") << tr("Size") << tr("Owner") << tr("Group") << tr("Time"));
-    fileList->header()->setStretchLastSection(false);
+  // fileList->header()->setStretchLastSection(false);
 
     connectButton = new QPushButton(tr("Подключить"));
     connectButton->setEnabled(false);
@@ -115,7 +115,7 @@ mainWindow::mainWindow(QWidget *parent): QDialog(parent),ftp(0)
     connect (buttonLoad,SIGNAL(clicked()),this,SLOT(loadFile()));
 
     setLayout(all);
-    setWindowTitle(tr("Brovar's ftp"));
+    setWindowTitle(tr("Brovar's FTP-client"));
 }
 
 void mainWindow::adressOfCompIsChange()
@@ -205,6 +205,7 @@ void mainWindow::downloadFile()
     else
         fullFileName = adressOfComp+"/"+fileName;
 
+
     if (QFile::exists(fullFileName)) {
         QMessageBox::information(this, tr("FTP"),
                                  tr("В текущей дериктории уже существует файл с именем %1.")
@@ -221,24 +222,41 @@ void mainWindow::downloadFile()
     }
 
     ftp->get(fileList->currentItem()->text(0), file);
-
     progressDialog->setLabelText(tr("Скачивание %1...").arg(fileName));
     downloadButton->setEnabled(false);
     progressDialog->exec();
+
 }
 
 void mainWindow::loadFile()
 {
-        QFile *file = new QFile(adressOfComp, this);
-        file->open(QFile::ReadOnly);
-        ftp->put(file,adressOfComp);
+    if (!anonymusOrNo)
+    {
+        QString fileName = adressOfComp;
+        QFileInfo  fileInfo(fileName);
+        QFile *upfile = new QFile(fileName);
+        upfile->open(QIODevice::ReadOnly | QIODevice::Unbuffered);
+        ftp->put(upfile, fileInfo.fileName());
+        upfile->close();
+        progressDialog->setLabelText(tr("Загрузка %1...").arg(fileInfo.fileName()));
+        progressDialog->exec();
+        fileList->clear();
+        ftp->list();
+    }
+    else
+        QMessageBox::information(this,"Ошибка!",AUTHORIZATION_ERROR);
 }
 
 void mainWindow::removeFile()
 {
-    ftp->remove(fileList->currentItem()->text(0));
-    fileList->clear();
-    ftp->list();
+    if (!anonymusOrNo)
+    {
+        ftp->remove(fileList->currentItem()->text(0));
+        fileList->clear();
+        ftp->list();
+    }
+    else
+        QMessageBox::information(this,"Ошибка!",AUTHORIZATION_ERROR);
 }
 
 void mainWindow::cancelDownload()
