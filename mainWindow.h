@@ -28,6 +28,7 @@ public:
     mainWindow(QWidget *parent=0);
     QSize sizeHint();
 private:
+    const QString AUTHORIZATION_ERROR = "Ошибка!Без авторизации данная функция недоступна!";
     // - для главного окна
     QMenuBar *menu;
     QMenu *fileMenu;
