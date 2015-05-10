@@ -54,6 +54,7 @@ public:
 	void returnToParentsDir();
 	void abort();
 	void close ();
+	void putFile(char *fileName);
 };
 
 #endif
