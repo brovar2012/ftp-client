@@ -251,35 +251,30 @@ void FTP:: abort ()
 	cout << "Передача данных прервана."<< endl;
 }
 
-/*void FTP::sendFile()
+void FTP::putFile(char *fileName)
 {
-		/*ifstream  file;
-		file.open("d:/2.mp3",ios::binary);
-		char singleBuffer[4096];
-		while (!file.eof())
-		{
-			file >> singleBuffer[0];
-			send(FTPsocket, singleBuffer, sizeof(singleBuffer), 0);
-		}
-		file.close();
-		return 1;
-	    init_data();
-		sending("STOR 33.mp3\r\n", FTPsocket);
-		readServ(FTPsocket);
-		system("pause");
+	initData();
 
-		FILE *file;
-		file = fopen("d:/33.mp3", "rb");  
-		int read = 0;
-		int fullSize=0;
-		do 
-		{
-			char buff[2048];   
-			int readed = send(DATA,buff,sizeof(buff),0);   
-			fread(buff,1,readed,file);  
-			fullSize++;
-			read += readed;  
-		} while (fullSize<1711);
+	char inquiry[1000];
+	sprintf(inquiry, "STOR %s\r\n", fileName);
+	sending(inquiry);
+	Sleep(SLEEP);
+	readServ();
 
-		fclose(file);
-} */
+	char fileN [1000];
+	sprintf(fileN, "d:/%s\r\n", fileName);
+
+	FILE *file;
+	file = fopen(fileN, "wb");  
+	int read = 0;
+	int fullSize;
+
+	while (file)
+	{
+		char singleBuffer[2048];
+		fread(singleBuffer,1,2048,file); 
+		send(FTPsocket, singleBuffer, sizeof(singleBuffer), 0);
+	}
+	readServ();
+	fclose(file);
+} 
