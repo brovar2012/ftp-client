@@ -1,4 +1,5 @@
 #include "FTP.h"
+#include <conio.h>
 
 int main()
 {
@@ -23,13 +24,16 @@ int main()
 		cout << "Ошибка авторизации.Повторите попытку либо зайдите анонимно." <<endl;
 		return 0;
 	}
+	system("pause");
+	system("cls");
 	client->getList();
-	client->goToDirectory("debian-backports");
+	client->putFile("1.txt");
+	/*client->goToDirectory("debian-backports");
 	error = client->deleteFile("ls-lR.gz");
 	if (error == -1)
 		cout << "Ошибка удаления.Возможно вы не обладаете правами доступа." <<endl;
 	client->goToDirectory();
-	client->getFile();
+	client->getFile();*/
 	client->close();
 	return 0;
 }
