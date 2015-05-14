@@ -1,6 +1,7 @@
 #ifndef FTP_H_
 #define FTP_H_H
 
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <winsock2.h>
 #include <iostream>
@@ -12,20 +13,23 @@
 
 using namespace std;
 
-static int SLEEP = 500;
-static char *DIR_FOR_SAVING = "d:/";
+const int MAX_STRING_LENGTH = 256;
+const int MAX_LIST_LENGTH = 65536;
+const int MAX_BUFFER_LENGTH = 2048;
 
-class FTP 
+static int SLEEP = 10;
+static char *DIR_FOR_SAVING = "d:/FOR FTP/";
+
+class FTP
 {
 private:
 	SOCKET FTPsocket;
 	SOCKET DATA;
-	char addressOfServer[100];
+	char addressOfServer[MAX_STRING_LENGTH];
 public:
-
 	void getAddress(char *address)
 	{
-		for(int i =0;address[i];i++)
+		for (int i = 0; address[i]; i++)
 			addressOfServer[i] = address[i];
 	}
 	void sending(char *str)
@@ -35,26 +39,27 @@ public:
 	}
 	void readServ()
 	{
-		char buff[1024];
-		for (int i = 0; i<1024; i++)
+		char buff[MAX_BUFFER_LENGTH];
+		for (int i = 0; i<MAX_BUFFER_LENGTH; i++)
 			buff[i] = '\0';
-		recv(FTPsocket, buff, 1024, 0);
+		recv(FTPsocket, buff, MAX_BUFFER_LENGTH, 0);
 		cout << "Server: " << buff;
 		Sleep(SLEEP);
 	}
 
 	int initData();
-	int initSock ();
+	int initSock();
 	int authorization();
 	char *getdata();
-	void getList();
-	void getFile(char *fileName);
+	void getList(char *list);
+	int getFile(char *fileName);
 	int deleteFile(char *fileForDelete);
 	void goToDirectory(char *nameOfDirectory);
 	void returnToParentsDir();
 	void abort();
-	void close ();
-	void putFile(char *fileName);
+	void close();
+	int putFile(char *fileName);
+
 };
 
 #endif
